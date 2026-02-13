@@ -6,6 +6,6 @@ import { defineConfig } from "astro/config";
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://tu-usuario.github.io',
-  base: '/nombre-del-repo', // Solo si el repo NO se llama tu-usuario.github.io
+  site: 'https://tomimurat.github.io',
+  base: '/', // Solo si el repo NO se llama tu-usuario.github.io
 });
