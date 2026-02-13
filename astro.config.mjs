@@ -2,14 +2,11 @@ import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
 
 export default defineConfig({
-  // Asegúrate de que tu usuario sea correcto
   site: 'https://tomimurat.github.io',
-  base: '/', 
-  integrations: [
-    icon(),
-  ],
-  // Esto ayuda a que Astro maneje mejor los archivos estáticos en GitHub
+  base: '/',
+  integrations: [icon()],
+  // Esto obliga a Astro a meter todo el CSS junto para que no se pierda
   build: {
-    assets: '_assets',
+    inlineStylesheets: 'always'
   }
 });
