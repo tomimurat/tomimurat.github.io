@@ -1,4 +1,10 @@
-/* TODO: consider creating <Button> and <GradientText> components */
+@import "tailwindcss";
+/* Tus otros estilos aquí debajo */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ... después de esto puede ir tu código con los @apply *//* TODO: consider creating <Button> and <GradientText> components */
 a,
 .btn {
   @apply transition-colors duration-200;
