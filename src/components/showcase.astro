@@ -1,0 +1,55 @@
+---
+import { getCollection } from "astro:content";
+import ShowcaseCard from "~/components/showcase-card.astro";
+
+// 1. Obtener y ordenar proyectos
+const featuredSites = await getCollection(
+  "showcase",
+  ({ data }) => "featured" in data,
+);
+const orderedSites = featuredSites.sort(
+  (a, b) => a.data.featured! - b.data.featured!,
+);
+---
+
+<section id="showcase" class="py-20 px-4 w-full">
+  <div class="max-w-6xl mx-auto space-y-12">
+    
+    {/* Encabezado Simple */}
+    <div class="text-center space-y-4">
+      <h2 class="text-4xl font-extrabold uppercase tracking-tight text-default drop-shadow-sm">
+          Featured Projects
+      </h2>
+      <p class="text-lg text-offset max-w-2xl mx-auto">
+        A selection of technological solutions tailored to real-world needs.      </p>
+    </div>
+
+    {/* GRID: La clave de la simplicidad. Responsivo y ordenado. */}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {orderedSites.map((site) => <ShowcaseCard site={site} />)}
+    </div>
+
+  </div>
+</section>
+
+{/* Script para animar la entrada (Fade-In) de las cartas suavemente */}
+<script>
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1 // Se activa cuando se ve el 10% de la carta
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('reveal-visible');
+        observer.unobserve(entry.target); // Dejar de observar para ahorrar recursos
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.reveal-card').forEach((card) => {
+    observer.observe(card);
+  });
+</script>

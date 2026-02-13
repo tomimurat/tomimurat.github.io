@@ -1,0 +1,196 @@
+---
+import { Icon } from "astro-icon/components";
+import ContentSection from "~/components/content-section.astro";
+import type { FeatureItem } from "~/types";
+import { Image } from "astro:assets";
+import blackHoleImage from "~/assets/black-hole.png";
+
+const features: Array<FeatureItem> = [
+  {
+    title: "Stock Management System with Flexxus ERP Integration",
+    description: "Development of a native Andriod mobile application designed for fast and accurate inventory management.",
+    icon: "mdi:barcode",
+  },
+  {
+    title: "Desktop Tool for Barcode Scanning and Excel Report Generation",
+    description: "Designed for high-volume inventory date capture, processes the scanned information and generates a unified Excel File.",
+    icon: "mdi:computer",
+  },
+  {
+    title: "Data Extraction with OCR.Space and Analysis with Gemini",
+    description: "Development of a web application for the automated digitization and analysis of documents.",
+    icon: "mdi:receipt-text",
+  },
+  {
+    title: "Front-end Developtment and High-Performanmce Static Sites",
+    description: "Specializing in the development of professional and optimized websites.",
+    icon: "mdi:web",
+  },
+  {
+    title: "Process and Repetitive Task Automation using N8N",
+    description: "design and implementation of workflows using n8n to optimize operational efficiency. I focus on identifying and automating tedious and repetitive tasks.",
+    icon: "mdi:workflow",
+  },
+  {
+    title: "Web Scraping and Data Organization with Python",
+    description: "Web scraping for information gathering from the internet. To navigate, extract, and clean data from various web sources",
+    icon: "mdi:pickaxe",
+  },
+];
+---
+
+<section id="features" class="relative min-h-screen flex items-center justify-center overflow-hidden bg-black breakout">
+  <canvas id="features-starfield" class="absolute inset-0 z-0 w-full h-full opacity-60"></canvas>
+
+  <div id="black-hole-container" 
+       class="absolute pointer-events-none"
+       style="z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%); will-change: transform;">
+    <Image
+      src={blackHoleImage}
+      alt="Black Hole"
+      class="w-[350px] md:w-[700px] h-auto object-contain opacity-100 mix-blend-screen"
+      loading="eager"
+    />
+  </div>
+
+  <div class="relative z-10 w-full py-24 px-4">
+    <div class="max-w-6xl mx-auto space-y-12">
+        <div class="text-center">
+            <h2 class="gradient-text text-4xl font-extrabold tracking-tight text-white sm:text-5xl mb-6">
+                Personal Projects
+            </h2>
+            <p class="max-w-xl mx-auto text-lg text-offset text-gray-300">
+                Engineering <span class="text-primary font-bold">practical solutions for real-world scenarios</span> across diverse development environments.
+            </p>
+        </div>
+
+        <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map(({ title, description, icon }) => (
+                <li class="flex flex-col items-center gap-4 border border-white/10 bg-black/60 backdrop-blur-md p-8 rounded-2xl hover:border-primary/50 transition-all duration-300 hover:scale-105 group">
+                    <div class="size-16 rounded-full border-2 border-primary/30 p-3 bg-black/50 group-hover:border-primary transition-colors">
+                        <Icon name={icon} class="size-full text-primary" />
+                    </div>
+                    <p class="text-center font-extrabold text-xl text-white">{title}</p>
+                    <p class="text-center text-gray-400 text-sm leading-relaxed">{description}</p>
+                </li>
+            ))}
+        </ul>
+    </div>
+  </div>
+
+</section>
+
+<style>
+  /* ... tus otros estilos ... */
+
+  /* Esta clase fuerza a la sección a salirse de cualquier margen padre */
+  .breakout {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+
+  /* Aseguramos que el starfield ocupe todo ese nuevo espacio */
+  :global(#features-starfield) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+</style>
+<script>
+  // 1. STARFIELD SIMPLIFICADO Y ROBUSTO
+  function initStars() {
+    const canvas = document.getElementById('features-starfield');
+    const section = document.getElementById('features');
+    if (!canvas || !section) return;
+
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    const stars = [];
+    const numStars = 400; // Cantidad de estrellas
+
+    // Ajustar tamaño
+    const resize = () => {
+      width = canvas.width = section.clientWidth;
+      height = canvas.height = section.clientHeight;
+    };
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Crear estrellas
+    for (let i = 0; i < numStars; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        z: Math.random() * 2, // Profundidad/Velocidad
+        o: Math.random(),     // Opacidad
+      });
+    }
+
+    // Animación
+    function animate() {
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, width, height); // Fondo negro con estela
+
+      stars.forEach(star => {
+        // Mover estrella (efecto warp hacia el centro o simple flujo)
+        // Haremos un flujo simple hacia abajo para dar sensación de caída espacial
+        star.y += star.z * 0.5; 
+        
+        // Resetear si sale de pantalla
+        if (star.y > height) {
+            star.y = 0;
+            star.x = Math.random() * width;
+        }
+
+        // Dibujar
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.o})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.z * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+  }
+
+  // 2. PARALLAX INTELIGENTE (Relativo a la sección)
+  function initParallax() {
+    const hole = document.getElementById('black-hole-container');
+    const section = document.getElementById('features');
+    if (!hole || !section) return;
+
+    const updatePosition = () => {
+        const rect = section.getBoundingClientRect();
+        const viewHeight = window.innerHeight;
+
+        // Verificamos si la sección está visible en pantalla
+        if (rect.top < viewHeight && rect.bottom > 0) {
+            // Calculamos cuánto hemos scrolleado dentro de la sección
+            // speed negativo = se mueve opuesto al scroll
+            const speed = -0.70; 
+            const yOffset = (rect.top - viewHeight / 2) * speed;
+            
+            // Aplicamos transform manteniendo el centrado
+            hole.style.transform = `translate(-50%, calc(-150% + ${yOffset}px))`;
+        }
+    };
+
+    window.addEventListener('scroll', updatePosition);
+    updatePosition(); // Inicializar posición
+  }
+
+  // EJECUCIÓN
+  // Usamos 'astro:page-load' para compatibilidad con ViewTransitions, o DOMContentLoaded
+  document.addEventListener('astro:page-load', () => {
+    initStars();
+    initParallax();
+  });
+  document.addEventListener('DOMContentLoaded', () => {
+    initStars();
+    initParallax();
+  });
+</script>

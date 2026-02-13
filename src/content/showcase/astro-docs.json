@@ -1,0 +1,7 @@
+{
+  "title": "Inventory Management System",
+  "description": "Streamlines stock taking via barcode scanner, automatically exporting Excel.",
+  "image": "/src/content/showcase/_images/Stock.png",
+  "url": "https://docs.astro.build/",
+  "featured": 2
+}

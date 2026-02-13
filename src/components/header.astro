@@ -1,0 +1,262 @@
+---
+import { Icon } from "astro-icon/components";
+import ThemeSwitcher from "~/components/theme-switcher.astro";
+import type { NavItem } from "~/types";
+
+const navItems: Array<NavItem> = [
+  { title: "Projects", url: "#features" },
+  { title: "Info", url: "#compatibility" },
+  { title: "About Me", url: "#showcase" },
+];
+---
+
+<header
+  id="page-header"
+  class="absolute bottom-0 z-20 flex w-full items-center justify-between border-b border-transparent px-8 py-4 text-white"
+  style="overflow: visible !important;"
+>
+  <a id="constellation-trigger" class="flex items-center gap-3 cursor-pointer group no-theme relative" href="#" 
+   style="text-decoration: none; width: 200px; height: 80px; margin-left: 30px">
+  
+  <h1 class="text-5xl font-bold futurista absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style="opacity: 0; z-index: 10; white-space: nowrap; pointer-events: none;">TuNuevaPalabra</h1>
+  
+  <canvas id="constellation-canvas" width="250" height="80" style="position: absolute; top: 0; left: 0; pointer-events: none; z-index: 20;"></canvas>
+</a>
+
+  <div>
+    <div class="flex items-center gap-6">
+      <nav class="hidden sm:block">
+        <ul class="flex items-center gap-6">
+          {navItems.map(({ title, url }) => (
+              <li><a class="text-sm" href={url}>{title}</a></li>
+          ))}
+        </ul>
+      </nav>
+      <button id="open-nav-button" type="button" class="btn sm:hidden" aria-label="Navigation">
+        <Icon name="mdi:menu" class="size-8" />
+      </button>
+      <ThemeSwitcher />
+    </div>
+    
+    <div id="menu-modal" class="modal hidden" aria-hidden="true">
+        <div class="fixed inset-0 bg-default px-8 py-4 text-default">
+            <div class="space-y-4" role="dialog" aria-modal="true">
+              <header class="text-right">
+                <button id="close-nav-button" type="button" class="btn" aria-label="Close navigation">
+                  <Icon name="mdi:close" class="size-8" />
+                </button>
+              </header>
+              <div class="flex justify-center">
+                 <h2 class="text-2xl font-bold"></h2>
+              </div>
+              <nav>
+                <ul class="flex flex-col">
+                  {navItems.map(({ title, url }) => (
+                      <li><a class="block py-4 text-center text-xl" href={url}>{title}</a></li>
+                  ))}
+                </ul>
+              </nav>
+            </div>
+          </div>
+    </div>
+  </div>
+</header>
+
+<style is:global>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+
+  /* BLOQUEO DE TEMA */
+  .no-theme, .no-theme:hover {
+    transition: none !important;
+  }
+
+  .futurista {
+    font-family: 'Orbitron', sans-serif;
+    /* Importante: Usamos el peso 700 (bold) para que haya más área para los puntos */
+    font-weight: 700; 
+    letter-spacing: 1px;
+  }
+</style>
+
+<script>
+  // @ts-nocheck
+  
+  function initConstellation() {
+    const canvas = document.getElementById('constellation-canvas');
+    const trigger = document.getElementById('constellation-trigger');
+    if (!canvas || !trigger) return;
+
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const cw = canvas.width;
+    const ch = canvas.height;
+
+    let particles = [];
+    let isHovering = false;
+    let mouse = { x: null, y: null, radius: 40 }; 
+
+    // --- PASO 1: MUESTREO DEL TEXTO ---
+    ctx.fillStyle = 'white';
+    
+    // 1. CAMBIO AQUÍ: Agregamos espaciado entre letras (ajusta el número "10px" a tu gusto)
+    ctx.letterSpacing = "5px"; 
+    
+    // Recuerda que si agrandaste la letra a text-5xl, usa aprox 48px aquí
+    ctx.font = 'bold 28px Orbitron'; 
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('TomasMurat', cw / 2, ch / 2);
+
+    const textCoordinates = ctx.getImageData(0, 0, cw, ch);
+    ctx.clearRect(0, 0, cw, ch); 
+
+    // --- PASO 2: CLASE PARTÍCULA ---
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.baseX = this.x;
+        this.baseY = this.y;
+        this.size = Math.random() * 1.2 + 0.5;
+        this.density = (Math.random() * 10) + 2;
+        this.brightness = 0.3; 
+      }
+
+      draw() {
+        // Las estrellas ya eran blancas, las dejamos así
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.brightness})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      update() {
+        if (isHovering && mouse.x != null) {
+          let dx = mouse.x - this.x;
+          let dy = mouse.y - this.y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+          let forceDirectionX = dx / distance;
+          let forceDirectionY = dy / distance;
+          let force = (mouse.radius - distance) / mouse.radius;
+          let directionX = forceDirectionX * force * this.density;
+          let directionY = forceDirectionY * force * this.density;
+
+          if (distance < mouse.radius) {
+            this.x += directionX * 0.5;
+            this.y += directionY * 0.5;
+            this.brightness = 1; 
+          } else {
+            if (this.x !== this.baseX) { let dx = this.x - this.baseX; this.x -= dx/10; }
+            if (this.y !== this.baseY) { let dy = this.y - this.baseY; this.y -= dy/10; }
+            this.brightness = 0.5; 
+          }
+        } else {
+          if (this.x !== this.baseX) { let dx = this.x - this.baseX; this.x -= dx/10; }
+          if (this.y !== this.baseY) { let dy = this.y - this.baseY; this.y -= dy/10; }
+          this.brightness = 0.3; 
+        }
+        this.draw();
+      }
+    }
+
+    // --- PASO 3: CREACIÓN DE PUNTOS (VERSIÓN RECTA Y DEFINIDA) ---
+    function initParticles() {
+      particles = [];
+      
+      // CAMBIO 1: Bajamos el salto de 4 a 3 para tener mayor definición en los bordes
+      const gap = 4; 
+
+      for (let y = 0, y2 = textCoordinates.height; y < y2; y += gap) {
+        for (let x = 0, x2 = textCoordinates.width; x < x2; x += gap) {
+          
+          // Verificamos si hay píxel
+          if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 128) {
+            let positionX = x;
+            let positionY = y;
+            
+            // CAMBIO 2: ¡Quitamos el Math.random()!
+            // Antes: new Particle(positionX + (Math.random()*2-1), positionY + (Math.random()*2-1))
+            // Ahora: new Particle(positionX, positionY)
+            // Esto fuerza a los puntos a quedarse quietos y alineados.
+            particles.push(new Particle(positionX, positionY));
+          }
+        }
+      }
+    }
+
+    // --- PASO 4: LÓGICA DE CONEXIÓN (LINEAS) ---
+    function connect() {
+      let opacityValue = 1;
+      for (let a = 0; a < particles.length; a++) {
+        for (let b = a; b < particles.length; b++) {
+          let dx = particles[a].x - particles[b].x;
+          let dy = particles[a].y - particles[b].y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+          let maxDistance = 18; 
+
+          if (distance < maxDistance) {
+            opacityValue = 1 - (distance / maxDistance);
+            
+            // 2. CAMBIO AQUÍ: Cambiamos '0, 255, 255' (Cian) por '255, 255, 255' (Blanco)
+            ctx.strokeStyle = 'rgba(255, 255, 255,' + opacityValue * (isHovering ? 0.8 : 0.3) + ')';
+            
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(particles[a].x, particles[a].y);
+            ctx.lineTo(particles[b].x, particles[b].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, cw, ch);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+      }
+      connect();
+      requestAnimationFrame(animate);
+    }
+
+    trigger.addEventListener('mouseenter', () => isHovering = true);
+    trigger.addEventListener('mouseleave', () => {
+        isHovering = false;
+        mouse.x = null; mouse.y = null;
+    });
+    trigger.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    });
+
+    document.fonts.ready.then(() => {
+        initParticles();
+        animate();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initConstellation);
+  document.addEventListener('astro:page-load', initConstellation);
+
+  // --- SCRIPTS DEL MENÚ ORIGINAL ---
+  import MicroModal from "micromodal";
+  const menuModalId = "menu-modal";
+  const header = document.querySelector("#page-header");
+  const page = document.documentElement;
+  const menu = document.querySelector(`#${menuModalId} ul`);
+  const openNavButton = document.querySelector("#open-nav-button");
+  const closeNavButton = document.querySelector("#close-nav-button");
+  if(header && menu && openNavButton && closeNavButton){
+      const openMenu = () => MicroModal.show(menuModalId, { disableScroll: true });
+      const closeMenu = () => MicroModal.close(menuModalId);
+      openNavButton.addEventListener("click", openMenu);
+      closeNavButton.addEventListener("click", closeMenu);
+      document.addEventListener("scroll", () => {
+          if(!header) return;
+          const d = page.clientHeight - page.scrollTop - header.offsetHeight;
+          header.classList.toggle("fixed-header", d < 0);
+      });
+      menu.addEventListener("click", (e) => { if (e.target.tagName === "A") closeMenu(); });
+  }
+</script>

@@ -1,0 +1,70 @@
+---
+import CompatibilityList from "~/components/compatibility-list.astro";
+import ContentSection from "~/components/content-section.astro";
+import type { CompatibilityItem } from "~/types";
+
+const frameworks: Array<CompatibilityItem> = [
+  {
+    title: "Python",
+    icon: "mdi:language-python",
+  },
+  {
+    title: "Java",
+    icon: "mdi:language-java",
+  },
+  {
+    title: "SQL",
+    icon: "mdi:database",
+  },
+  {
+    title: "POO",
+    icon: "mdi:puzzle",
+  },
+  {
+    title: "Flutter",
+    icon: "mdi:android",
+  },
+ 
+];
+
+const platforms: Array<CompatibilityItem> = [
+  {
+    title: "HTML5",
+    icon: "mdi:language-html5",
+  },
+  {
+    title: "CSS",
+    icon: "mdi:language-css3",
+  },
+  {
+    title: "JS",
+    icon: "mdi:language-javascript",
+  },
+  {
+    title: "Astro",
+    icon: "mdi:rocket",
+    },
+  {
+    title: "Git",
+    icon: "fa-brands:github",
+  },
+  
+];
+---
+
+<ContentSection title="About Me" id="compatibility">
+  <Fragment slot="lead">
+    I transform <span class="text-primary">manual tasks and data problems </span>into automated, efficient software<span class="text-primary"> solutions</span>
+   built to your company's specific needs.
+  </Fragment>
+  <CompatibilityList
+    items={frameworks}
+    title="BACKEND"
+    url="https://docs.astro.build/core-concepts/framework-components/"
+  />
+  <CompatibilityList
+    items={platforms}
+    title="FRONTEND"
+    url="https://docs.astro.build/guides/deploy/"
+  />
+</ContentSection>
